@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+<h:head>
+    <title>Authors</title>
+    <!-- Este estilo corresponde a boostrap. Puede copiar y pegar del sitio oficial de
+    bootstrap-->
+    <h:outputStylesheet name="css/bootstrap.min.css" />
+    <style type="text/css">
+        .table {
+            border-radius: 5px;
+            width: 50%;
+            margin: 0px auto;
+            float: none;
+        }
+    </style>
+</h:head>
+<h:body>
+    <h:form id="authorForm" styleClass="container">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>
+                    Authors Form
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+                <h:inputHidden  id="authorId" value="#{authorBean.author.authorId}"
+                             styleClass="formcontrol">
+                </h:inputHidden >
+                <tr>
+                    <td>
+                        <h:outputLabel for="authorForm:authorName"
+                                       value="AuthorName"></h:outputLabel>
+                        <h:inputText id="authorName" value="#{authorBean.author.authorName}"
+                                     required="true" requiredMessage="Ingrese nombre del autor"
+                                     styleClass="formcontrol"
+                                     style="display: block; width: 100%;">
+                        </h:inputText>
+                    </td>
+                </tr>
+            <tr>
+                <td>
+                    <h:outputLabel for="authorForm:authorBirth"
+                                   value="Birth"></h:outputLabel>
+                    <h:inputText id="authorBirth" a:type="date"
+                                 value="#{authorBean.author.authorBirth}" required="true" requiredMessage="Ingrese fecha de nacimiento" styleClass="form-control">
+                        <f:convertDateTime pattern="yyyy-MM-dd"/>
+                    </h:inputText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:outputLabel for="authorForm:authorNumber"
+                                   value="Number"></h:outputLabel>
+                    <h:inputText id="authorNumber"
+                                 value="#{authorBean.author.authorNumber}" required="true"
+                                 requiredMessage="Ingrese un número de teléfono válido" styleClass="form-control">
+                        <f:validator validatorId="sv.edu.udb.www.util.SVPhoneValidator" />
+                    </h:inputText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:outputLabel for="authorForm:genre" value="Genre"></h:outputLabel>
+                    <h:selectOneMenu id="genre" value="#{authorBean.author.literaryGenre}"
+                                     styleClass="form-control">
+                        <f:selectItems value="#{authorBean.literaryGenreModel.literaryGenre}"
+                                       var="l" itemLabel="#{l.name}" itemValue="#{l.id}"/>
+                    </h:selectOneMenu>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:commandButton value="Agregar" action="#{authorBean.addAuthor()}"
+                                     styleClass="btn btn-primary center-block">
+                        <f:ajax execute="@form" render="authorForm :datatableauthors"
+                                resetValues="true"/>
+                    </h:commandButton>
+                    <h:commandButton value="Modificar" action="#{authorBean.modifyAuthor()}"
+                                     styleClass="btn btn-dark center-block">
+                        <f:ajax execute="@form" render="authorForm :datatableauthors"
+                                resetValues="true"/>
+                    </h:commandButton>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td>
+                    <h:messages id="successMessage" infoStyle="color:darkgreen"
+                                errorStyle="color:darkred" />
+                    <h:messages id="errorMessage" infoStyle="color:darkgreen"
+                                globalOnly="true" errorStyle="color:darkred" />
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </h:form>
+    <h:form id="datatableauthors" styleClass="container">
+        <h:dataTable id="authorsTable" value="#{authorBean.authorModel.authors}"
+                     var="c"
+                     styleClass="table table-striped"
+        >
+            <h:column>
+                <f:facet name="header">
+                    Author ID
+                </f:facet>
+                #{c.authorId}
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    Author Name
+                </f:facet>
+                #{c.authorName}
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    Phone Number
+                </f:facet>
+                #{c.authorNumber}
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    Date Birth
+                </f:facet>
+                <h:outputText value="#{c.authorBirth}">
+                    <f:convertDateTime pattern="dd/MM/yyyy"/>
+                </h:outputText>
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    Literary Genre
+                </f:facet>
+                #{c.literaryGenre}
+            </h:column>
+            <h:column>
+                <f:facet name="header">
+                    Operations
+                </f:facet>
+                <h:commandButton styleClass="btn btn-dark" value="Modify"
+                                 onclick="rellenarCampos('#{c.authorId}', '#{c.authorName}', '#{c.authorBirth}', '#{c.authorNumber}', '#{c.literaryGenre}'); return false;">
+                </h:commandButton>
+                <h:commandButton styleClass="btn btn-danger"
+                                 action="#{authorBean.deleteAuthor(c)}" onclick="if (! confirm('Do you want to delete this author?')) return false" value="Delete">
+                    <f:ajax execute="@form" render="@form" />
+                </h:commandButton>
+            </h:column>
+        </h:dataTable>
+    </h:form>
+    <script type="text/javascript">
+        function rellenarCampos(authorId, authorName, authorBirth, authorNumber, literaryGenre) {
+            var authorIdField = document.getElementById('authorForm:authorId');
+            var authorNameField = document.getElementById('authorForm:authorName');
+            var authorBirthField = document.getElementById('authorForm:authorBirth');
+            var authorNumberField = document.getElementById('authorForm:authorNumber');
+            var literaryGenreField = document.getElementById('authorForm:genre');
+
+            authorIdField.value = authorId;
+            authorNameField.value = authorName;
+            authorBirthField.value = authorBirth;
+            authorNumberField.value = authorNumber;
+
+            for (var i = 0; i &lt; literaryGenreField.options.length; i++) {
+                if (literaryGenreField.options[i].text === literaryGenre) {
+                    literaryGenreField.selectedIndex = i;
+                    break;
+                }
+            }
+
+            authorNameField.dispatchEvent(new Event('input'));
+            authorBirthField.dispatchEvent(new Event('input'));
+            authorNumberField.dispatchEvent(new Event('input'));
+            literaryGenreField.dispatchEvent(new Event('change'));
+        }
+    </script>
+</h:body>
+</html>
